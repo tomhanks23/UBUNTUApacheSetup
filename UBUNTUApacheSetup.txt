@@ -1,0 +1,80 @@
+##
+# Instructions for setting up a basic Apache environment on *UBUNTU ONLY*
+# Specifically, these instructions are good for newer verions of Ubuntu
+# that employ newer versions of Apache (2.4)
+# 
+# Note: File contents are denoted within hyphen lines below, you
+# don't actually type the hyphens. Also, remember to replace [projectname]
+# with your project name :)
+#
+ 
+# Note the -y option means answer yes for any questions
+$ sudo apt-get update
+$ sudo apt-get install -y apache2 apache2-utils
+ 
+# Remove any files/folders already in Apache's default webroot
+$ sudo rm -rf /var/www/*
+ 
+# Make a Virtual Host file, note the .conf extension
+$ sudo nano /etc/apache2/sites-available/[projectname].conf
+ 
+# Create the following contents in your .conf file
+#-----------------------------
+<VirtualHost *:80>
+    ServerAdmin your@email.com
+    ServerName  [projectname].com
+    #ServerAlias www.[projectname].com
+    DocumentRoot /var/www/[projectname]/htdocs
+    LogLevel warn
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+#------------------------------
+ 
+# Make Project Folder
+$ sudo mkdir /var/www/[projectname]
+$ sudo mkdir /var/www/[projectname]/htdocs
+ 
+# Make am index file in your new project
+$ sudo echo 'hello world' > /var/www/[projectname]/htdocs/index.html
+ 
+# Enable your Virtual Host file. You would only need to do this once
+# per project. This stands for "Apache2 Enable Site"
+$ sudo a2ensite [projectname].conf
+ 
+# Soft reset Apache. Note that any changes to any apache '.conf' files
+# will require this reload.
+$ sudo service apache2 reload
+ 
+# Since you created the website using sudo, it's currently owned by root. This sucks
+# because now you will have to do sudo change anything in your project. To change
+# the owner user to Apache, you can do this. The 'www-root' is the name of the Apache
+# user in ubuntu. The -r part means 'recursively change this folder and
+# all the sub folders/files'
+$ sudo chown www-data:www-data -R /var/www/[projectname]
+ 
+# Do this to make sure the project is owned by Apache now (based on the above line)
+# You should see that the owner of the project folder is www-data
+$ ls -la /var/www/[projectname]
+ 
+##
+# This part is optional, but if we want an easy-to-remember local domain name:
+#
+ 
+# Edit our local computer's hosts file
+$ sudo nano /etc/hosts
+ 
+# After the hosts file's default values, type this. And remember
+# to match the domain name to whatever value you put in 'ServerName'
+# of your VirtualHost file above
+#-----------------------------
+127.0.0.1   [projectname].com
+#-----------------------------
+ 
+##
+# What if you want to disable a project?
+#
+ 
+# Disable Site
+$ sudo a2dissite [projectname].conf
+$ sudo service apache2 reload
